@@ -38,33 +38,30 @@ def fillMap(m):
 with open("test", "r") as file:
     lines = file.readlines()
     maps = []
-    coords = []
+    coords = set()
     ma1, ma2 = 0,0
     for l in lines:
         t1, t2 = l.split(",")
         c1, c2 = int(t1), int(t2)
         ma1 = max(ma1, c1)
         ma2 = max(ma2, c2)
-        coords.append((c1,c2))
+        coords.add((c1,c2))
 
-    maps = [['.' for _ in range(ma1 + 1)] for _ in range(ma2 + 1)]
+    maps = [[(i,j) in coords for i in range(ma1 + 1)] for j in range(ma2 + 1)]
+    histo = [0 for _ in range(ma1 + 1)]
     print("Maps is created")
-    for i in range(len(coords)):
-        maps[coords[i][1]][coords[i][0]] = "#"
-        for j in range(i + 1, len(coords)):
-            maps[coords[j][1]][coords[j][0]] = "#"
-            drawGreenLine(maps, coords[i], coords[j])
-    print("Green Lines has been drawn")
-    fillMap(maps)
-    print("Maps is fill")
-    m = 0
-    for i in range(len(coords)):
-        for j in range(i + 1, len(coords)):
-            if containsDot(maps, coords[i], coords[j]):
-                continue
-            temp = area(coords[i], coords[j])
-            if temp > m:
-                m = temp
+    for x in range(ma1 + 1):
+        for y in range(ma2 + 1):
+            histo[x] += maps[y][x]
 
-    printMap(maps)
+
+
+    stack = []
+    for i in range(len(histo)+1):
+        while stack and (i == len(histo) or histo[i] < histo[stack[-1]]):
+            h = histo[stack.pop()]
+            w = i if stack == [] else i - stack[-1] - 1
+            max_area = max(max_area, h*w)
+        stack.append(i)
+
     print(m)
